@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
                 email,
             },
         });
-        res.json(user);
+        res.json(`User with name  ${user.username} is created successfully`);
     } catch (error) {
            if (error.code === 'P2002') {
             if (error.meta?.target === 'User_username_key') {
@@ -41,7 +41,7 @@ const prisma = new PrismaClient();
                 email,
             },
         });
-        res.json('Task updated successfully');
+        res.json(`User updated successfully` );
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal server error');
@@ -62,18 +62,29 @@ const prisma = new PrismaClient();
         res.status(500).send('Internal server error!');
     }
 }
- const deleteUser = async (req, res) => {
+const deleteUser = async (req, res) => {
     try {
         const { userId } = req.params;
+        const user = await prisma.user.findUnique({
+            where: {
+                id: parseInt(userId)
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
         const deletedUser = await prisma.user.delete({
             where: {
-                id: parseInt(userId),
-            },
+                id: parseInt(userId)
+            }
         });
-        res.json('User deleted successfully');
+
+        return res.status(200).json({ message: 'User deleted successfully' });
     } catch (error) {
         console.error(error);
-        res.status(500).send('Internal server error');
+        return res.status(500).json({ error: 'Internal server error' });
     }
 };
  const assignTaskToUser = async (req, res) => {
